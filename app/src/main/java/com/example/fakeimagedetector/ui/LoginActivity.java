@@ -1,26 +1,86 @@
 package com.example.fakeimagedetector.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.fakeimagedetector.R;
+import com.example.fakeimagedetector.security.AuthManager;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private EditText etUsername, etPassword;
+    private Button btnAction;
+    private TextView tvSwitchAuth;
+    private AuthManager authManager;
+    private boolean isRegistrationMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        setContentView(R.layout.activity_login);
+
+        authManager = new AuthManager(this);
+
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+        btnAction = findViewById(R.id.btnLogin);
+        tvSwitchAuth = findViewById(R.id.tvSwitchAuth);
+
+        if (!authManager.isAnyUserRegistered()) {
+            setupRegistrationUI();
+        }
+
+        btnAction.setOnClickListener(v -> handleAuthAction());
+
+        tvSwitchAuth.setOnClickListener(v -> {
+            isRegistrationMode = !isRegistrationMode;
+            updateUI();
         });
+    }
+
+    private void handleAuthAction() {
+        String user = etUsername.getText().toString().trim();
+        String pass = etPassword.getText().toString().trim();
+
+        if (user.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(this, "Inserisci tutte le credenziali", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (isRegistrationMode) {
+            authManager.register(user, pass);
+            Toast.makeText(this, "Registrazione completata! Ora accedi.", Toast.LENGTH_SHORT).show();
+            isRegistrationMode = false;
+            updateUI();
+        } else {
+            if (authManager.login(user, pass)) {
+                Intent intent = new Intent(LoginActivity.this, ImagePickerActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(this, "Credenziali errate", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void updateUI() {
+        if (isRegistrationMode) {
+            btnAction.setText("REGISTER");
+            tvSwitchAuth.setText("Hai già un account? Accedi");
+        } else {
+            btnAction.setText("LOGIN");
+            tvSwitchAuth.setText("Non hai un account? Registrati");
+        }
+    }
+
+    private void setupRegistrationUI() {
+        isRegistrationMode = true;
+        updateUI();
     }
 }
