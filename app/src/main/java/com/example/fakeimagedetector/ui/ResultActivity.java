@@ -1,26 +1,49 @@
 package com.example.fakeimagedetector.ui;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
+import android.provider.MediaStore;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.example.fakeimagedetector.R;
+import com.example.fakeimagedetector.logic.FFTAnalyzer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ResultActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_result);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        ImageView ivFft = findViewById(R.id.ivFftResult);
+        TextView tvPercent = findViewById(R.id.tvClassification);
+        Button btnClose = findViewById(R.id.btnClose);
+
+        String uriString = getIntent().getStringExtra("IMAGE_URI");
+        if (uriString != null) {
+            Uri imageUri = Uri.parse(uriString);
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute(() -> {
+                try {
+                    Bitmap original = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                    FFTAnalyzer.AnalysisResult result = FFTAnalyzer.analyze(original);
+
+                    runOnUiThread(() -> {
+                        ivFft.setImageBitmap(result.fftBitmap);
+                        tvPercent.setText(String.format("Artificialità: %.2f%%", result.fakeProbability));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        btnClose.setOnClickListener(v -> finish());
     }
 }
