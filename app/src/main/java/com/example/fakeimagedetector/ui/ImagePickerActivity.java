@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,6 +31,8 @@ public class ImagePickerActivity extends AppCompatActivity {
     private Button btnCheck;
     private Uri selectedImageUri;
 
+    private Switch swAnalysisMode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,22 +41,22 @@ public class ImagePickerActivity extends AppCompatActivity {
         ivPreview = findViewById(R.id.ivPreview);
         Button btnLoad = findViewById(R.id.btnLoad);
         btnCheck = findViewById(R.id.btnCheck);
+        swAnalysisMode = findViewById(R.id.swAnalysisMode);
 
         btnLoad.setOnClickListener(v -> checkPermissionAndOpenGallery());
 
         btnCheck.setOnClickListener(v -> {
-            if (selectedImageUri != null) {
-                Intent intent = new Intent(this, ResultActivity.class);
-                intent.putExtra("IMAGE_URI", selectedImageUri.toString());
-                startActivity(intent);
-            }
+            Intent intent = new Intent(this, ResultActivity.class);
+            intent.putExtra("IMAGE_URI", selectedImageUri.toString());
+            intent.putExtra("USE_AI", swAnalysisMode.isChecked());
+            startActivity(intent);
         });
     }
 
     private void checkPermissionAndOpenGallery() {
         String permission;
 
-        // Android 13 (API 33) or grater
+        // Android 13 (API 33) or greater
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permission = Manifest.permission.READ_MEDIA_IMAGES;
         } else {

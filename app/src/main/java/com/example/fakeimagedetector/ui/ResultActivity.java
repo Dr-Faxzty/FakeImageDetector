@@ -7,13 +7,19 @@ import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.logic.FFTAnalyzer;
+import com.example.fakeimagedetector.logic.ONNXAnalyzer;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ResultActivity extends AppCompatActivity {
+    private ONNXAnalyzer onnxAnalyzer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +31,8 @@ public class ResultActivity extends AppCompatActivity {
         Button btnClose = findViewById(R.id.btnClose);
 
         String uriString = getIntent().getStringExtra("IMAGE_URI");
+        boolean useAI = getIntent().getBooleanExtra("USE_AI", false);
+
         if (uriString != null) {
             Uri imageUri = Uri.parse(uriString);
 
@@ -32,14 +40,33 @@ public class ResultActivity extends AppCompatActivity {
             executor.execute(() -> {
                 try {
                     Bitmap original = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    FFTAnalyzer.AnalysisResult result = FFTAnalyzer.analyze(original);
+
+                    final double probability;
+                    final Bitmap displayBitmap;
+
+                    if (useAI) {
+                        if (onnxAnalyzer == null) {
+                            onnxAnalyzer = new ONNXAnalyzer(this);
+                        }
+                        probability = onnxAnalyzer.predict(original);
+                        displayBitmap = original;
+                    } else {
+                        FFTAnalyzer.AnalysisResult result = FFTAnalyzer.analyze(original);
+                        probability = result.fakeProbability;
+                        displayBitmap = result.fftBitmap;
+                    }
 
                     runOnUiThread(() -> {
-                        ivFft.setImageBitmap(result.fftBitmap);
-                        tvPercent.setText(String.format("Artificialità: %.2f%%", result.fakeProbability));
+                        ivFft.setImageBitmap(displayBitmap);
+                        String method = useAI ? "IA (ONNX)" : "FFT";
+                        tvPercent.setText(String.format("Metodo: %s\nArtificialità: %.2f%%", method, probability));
                     });
+
                 } catch (Exception e) {
                     e.printStackTrace();
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Errore durante l'analisi: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
                 }
             });
         }
