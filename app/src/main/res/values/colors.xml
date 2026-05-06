@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Colori Principali -->
+    <color name="primary">#1A237E</color>
+    <color name="primary_variant">#0D47A1</color>
+    <color name="secondary">#00E5FF</color>
+
+    <!-- Sfondi e Superfici -->
+    <color name="background">#F5F7FA</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Stati Analisi -->
+    <color name="real_green">#2E7D32</color>
+    <color name="fake_red">#C62828</color>
+
+    <!-- Testo -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#535353</color>
 </resources>

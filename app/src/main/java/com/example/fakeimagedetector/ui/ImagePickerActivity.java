@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -23,15 +23,13 @@ import com.example.fakeimagedetector.R;
 import java.io.IOException;
 
 public class ImagePickerActivity extends AppCompatActivity {
-
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final int PICK_IMAGE_REQUEST = 101;
 
     private ImageView ivPreview;
     private Button btnCheck;
     private Uri selectedImageUri;
-
-    private Switch swAnalysisMode;
+    private SwitchCompat swAnalysisMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,24 +41,27 @@ public class ImagePickerActivity extends AppCompatActivity {
         btnCheck = findViewById(R.id.btnCheck);
         swAnalysisMode = findViewById(R.id.swAnalysisMode);
 
+        btnLoad.setText(R.string.btn_load);
+        btnCheck.setText(R.string.btn_check);
+        swAnalysisMode.setText(R.string.switch_ai_mode);
+
         btnLoad.setOnClickListener(v -> checkPermissionAndOpenGallery());
 
         btnCheck.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ResultActivity.class);
-            intent.putExtra("IMAGE_URI", selectedImageUri.toString());
-            intent.putExtra("USE_AI", swAnalysisMode.isChecked());
-            startActivity(intent);
+            if (selectedImageUri != null) {
+                Intent intent = new Intent(this, ResultActivity.class);
+                intent.putExtra("IMAGE_URI", selectedImageUri.toString());
+                intent.putExtra("USE_AI", swAnalysisMode.isChecked());
+                startActivity(intent);
+            }
         });
     }
 
     private void checkPermissionAndOpenGallery() {
         String permission;
-
-        // Android 13 (API 33) or greater
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permission = Manifest.permission.READ_MEDIA_IMAGES;
         } else {
-            // lower versions
             permission = Manifest.permission.READ_EXTERNAL_STORAGE;
         }
 
@@ -84,7 +85,7 @@ public class ImagePickerActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openGallery();
             } else {
-                Toast.makeText(this, "Permesso negato. Non puoi caricare immagini.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permesso negato.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -97,7 +98,11 @@ public class ImagePickerActivity extends AppCompatActivity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
                 ivPreview.setImageBitmap(bitmap);
+
                 btnCheck.setEnabled(true);
+                btnCheck.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.secondary));
+                btnCheck.setTextColor(ContextCompat.getColor(this, R.color.primary));
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

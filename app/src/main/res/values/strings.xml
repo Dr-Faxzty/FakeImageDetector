@@ -1,3 +1,23 @@
 <resources>
-    <string name="app_name">FakeImageDetector</string>
+    <string name="app_name">Deepfake Detector</string>
+
+    <string name="title_auth">FAKE IMAGE DETECTOR</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_login">LOGIN</string>
+    <string name="btn_register">REGISTER</string>
+    <string name="auth_switch_register">Non hai un account? Registrati</string>
+    <string name="auth_switch_login">Hai già un account? Accedi</string>
+
+    <string name="btn_load">CARICA IMMAGINE</string>
+    <string name="btn_check">VERIFICA ORA</string>
+    <string name="switch_ai_mode">Usa Modello IA (ONNX)</string>
+    <string name="content_desc_preview">Anteprima immagine selezionata</string>
+
+    <string name="title_result">RISULTATO ANALISI</string>
+    <string name="btn_close">CHIUDI</string>
+    <string name="status_calculating">Calcolo in corso…</string>
+    <string name="method_label">Metodo: %1$s</string>
+    <string name="probability_label">Artificialità: %1$.2f%%</string>
+    <string name="content_desc_fft">Spettro delle frequenze FFT</string>
 </resources>

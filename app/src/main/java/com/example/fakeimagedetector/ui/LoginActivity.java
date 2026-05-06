@@ -8,12 +8,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.security.AuthManager;
 
 public class LoginActivity extends AppCompatActivity {
-
     private EditText etUsername, etPassword;
     private Button btnAction;
     private TextView tvSwitchAuth;
@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if (isRegistrationMode) {
             authManager.register(user, pass);
-            Toast.makeText(this, "Registrazione completata! Ora accedi.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registrazione completata! Accedi ora.", Toast.LENGTH_SHORT).show();
             isRegistrationMode = false;
             updateUI();
         } else {
@@ -71,11 +71,15 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUI() {
         if (isRegistrationMode) {
-            btnAction.setText("REGISTER");
-            tvSwitchAuth.setText("Hai già un account? Accedi");
+            btnAction.setText(R.string.btn_register);
+            tvSwitchAuth.setText(R.string.auth_switch_login);
+
+            btnAction.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.secondary));
         } else {
-            btnAction.setText("LOGIN");
-            tvSwitchAuth.setText("Non hai un account? Registrati");
+            btnAction.setText(R.string.btn_login);
+            tvSwitchAuth.setText(R.string.auth_switch_register);
+
+            btnAction.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.secondary));
         }
     }
 

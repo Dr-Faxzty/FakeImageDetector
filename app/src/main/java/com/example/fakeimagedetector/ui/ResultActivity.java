@@ -26,8 +26,8 @@ public class ResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
 
-        ImageView ivFft = findViewById(R.id.ivFftResult);
-        TextView tvPercent = findViewById(R.id.tvClassification);
+        ImageView ivFftResult = findViewById(R.id.ivFftResult);
+        TextView tvClassification = findViewById(R.id.tvClassification);
         Button btnClose = findViewById(R.id.btnClose);
 
         String uriString = getIntent().getStringExtra("IMAGE_URI");
@@ -57,9 +57,18 @@ public class ResultActivity extends AppCompatActivity {
                     }
 
                     runOnUiThread(() -> {
-                        ivFft.setImageBitmap(displayBitmap);
+                        ivFftResult.setImageBitmap(displayBitmap);
                         String method = useAI ? "IA (ONNX)" : "FFT";
-                        tvPercent.setText(String.format("Metodo: %s\nArtificialità: %.2f%%", method, probability));
+                        String methodLabel = getString(R.string.method_label, method);
+                        String probLabel = getString(R.string.probability_label, probability);
+
+                        tvClassification.setText(methodLabel + "\n" + probLabel);
+
+                        if (probability > 50) {
+                            tvClassification.setTextColor(getColor(R.color.fake_red));
+                        } else {
+                            tvClassification.setTextColor(getColor(R.color.real_green));
+                        }
                     });
 
                 } catch (Exception e) {
