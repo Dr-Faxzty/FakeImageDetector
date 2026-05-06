@@ -18,9 +18,9 @@ public class ONNXAnalyzer {
     }
 
     private String copyAssetToFile(Context context) throws Exception {
-        java.io.File file = new java.io.File(context.getFilesDir(), "deepfake_model.onnx");
+        java.io.File file = new java.io.File(context.getFilesDir(), "deepfake_model_quant.onnx");
         if (!file.exists()) {
-            try (java.io.InputStream is = context.getAssets().open("deepfake_model.onnx");
+            try (java.io.InputStream is = context.getAssets().open("deepfake_model_quant.onnx");
                  java.io.OutputStream os = new java.io.FileOutputStream(file)) {
                 byte[] buffer = new byte[4 * 1024];
                 int read;
