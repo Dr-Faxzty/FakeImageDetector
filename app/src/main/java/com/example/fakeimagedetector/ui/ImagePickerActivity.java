@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.app.ActivityOptions;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.fakeimagedetector.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.IOException;
 
@@ -36,6 +41,16 @@ public class ImagePickerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_picker);
 
+        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
+
+        topAppBar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_logout) {
+                handleLogout();
+                return true;
+            }
+            return false;
+        });
+
         ivPreview = findViewById(R.id.ivPreview);
         Button btnLoad = findViewById(R.id.btnLoad);
         btnCheck = findViewById(R.id.btnCheck);
@@ -45,6 +60,11 @@ public class ImagePickerActivity extends AppCompatActivity {
         btnCheck.setText(R.string.btn_check);
         swAnalysisMode.setText(R.string.switch_ai_mode);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
         btnLoad.setOnClickListener(v -> checkPermissionAndOpenGallery());
 
         btnCheck.setOnClickListener(v -> {
@@ -52,9 +72,25 @@ public class ImagePickerActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ResultActivity.class);
                 intent.putExtra("IMAGE_URI", selectedImageUri.toString());
                 intent.putExtra("USE_AI", swAnalysisMode.isChecked());
-                startActivity(intent);
+
+                ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                        this,
+                        ivPreview,
+                        "shared_image_container"
+                );
+
+                startActivity(intent, options.toBundle());
+            } else {
+                Toast.makeText(this, "Seleziona prima un'immagine", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void handleLogout() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void checkPermissionAndOpenGallery() {

@@ -1,7 +1,9 @@
 package com.example.fakeimagedetector.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -31,6 +33,11 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnAction = findViewById(R.id.btnLogin);
         tvSwitchAuth = findViewById(R.id.tvSwitchAuth);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
 
         if (!authManager.isAnyUserRegistered()) {
             setupRegistrationUI();

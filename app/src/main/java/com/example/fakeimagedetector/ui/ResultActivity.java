@@ -2,12 +2,17 @@ package com.example.fakeimagedetector.ui;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,18 +25,29 @@ import java.util.concurrent.Executors;
 
 public class ResultActivity extends AppCompatActivity {
     private ONNXAnalyzer onnxAnalyzer;
+    private CircularProgressIndicator loadingProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportPostponeEnterTransition();
         setContentView(R.layout.activity_result);
 
         ImageView ivFftResult = findViewById(R.id.ivFftResult);
         TextView tvClassification = findViewById(R.id.tvClassification);
         Button btnClose = findViewById(R.id.btnClose);
+        loadingProgress = findViewById(R.id.loadingProgress);
+
+        loadingProgress.setVisibility(View.VISIBLE);
+        tvClassification.setVisibility(View.INVISIBLE);
 
         String uriString = getIntent().getStringExtra("IMAGE_URI");
         boolean useAI = getIntent().getBooleanExtra("USE_AI", false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
 
         if (uriString != null) {
             Uri imageUri = Uri.parse(uriString);
@@ -57,12 +73,25 @@ public class ResultActivity extends AppCompatActivity {
                     }
 
                     runOnUiThread(() -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        tvClassification.setVisibility(View.VISIBLE);
                         ivFftResult.setImageBitmap(displayBitmap);
+
+                        ivFftResult.getViewTreeObserver().addOnPreDrawListener(
+                                new ViewTreeObserver.OnPreDrawListener() {
+                                    @Override
+                                    public boolean onPreDraw() {
+                                        ivFftResult.getViewTreeObserver().removeOnPreDrawListener(this);
+                                        supportStartPostponedEnterTransition();
+                                        return true;
+                                    }
+                                });
+
                         String method = useAI ? "IA (ONNX)" : "FFT";
                         String methodLabel = getString(R.string.method_label, method);
                         String probLabel = getString(R.string.probability_label, probability);
 
-                        tvClassification.setText(methodLabel + "\n" + probLabel);
+                        tvClassification.setText(methodLabel + "\n" + probLabel + "%");
 
                         if (probability > 50) {
                             tvClassification.setTextColor(getColor(R.color.fake_red));
@@ -73,13 +102,15 @@ public class ResultActivity extends AppCompatActivity {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Errore durante l'analisi: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                    );
+                    runOnUiThread(() -> {
+                        loadingProgress.setVisibility(View.GONE);
+                        supportStartPostponedEnterTransition();
+                        Toast.makeText(this, "Errore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
                 }
             });
         }
 
-        btnClose.setOnClickListener(v -> finish());
+       btnClose.setOnClickListener(v -> finishAfterTransition());
     }
 }

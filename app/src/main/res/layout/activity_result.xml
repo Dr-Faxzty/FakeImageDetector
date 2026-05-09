@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:fitsSystemWindows="true"
     android:background="@color/background">
 
     <LinearLayout
@@ -22,6 +23,16 @@
             android:layout_marginBottom="24dp"
             android:textColor="@color/primary"/>
 
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/loadingProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:indeterminate="true"
+            app:indicatorColor="@color/secondary"
+            app:trackCornerRadius="4dp" />
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="300dp"
@@ -36,6 +47,7 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:background="#000"
+                android:transitionName="shared_image_container"
                 android:contentDescription="@string/content_desc_fft" />
         </com.google.android.material.card.MaterialCardView>
 
