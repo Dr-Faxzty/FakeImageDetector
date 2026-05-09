@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="32dp"
     android:gravity="center"
@@ -16,30 +17,50 @@
         android:layout_marginBottom="40dp"
         android:textColor="@color/primary"/>
 
-    <EditText
-        android:id="@+id/etUsername"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints="Username"
-        android:hint="@string/hint_username"
-        android:textColorHint="@color/text_secondary"
-        android:backgroundTint="@color/primary"
-        android:inputType="textPersonName"
-        android:textColor="@color/text_primary"
-        android:minHeight="48dp" />
+        android:layout_marginBottom="16dp"
+        app:startIconDrawable="@android:drawable/ic_menu_edit"
+        app:startIconTint="@color/primary"
+        app:hintEnabled="false"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditText
-        android:id="@+id/etPassword"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_username"
+            android:inputType="textPersonName"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:background="@android:color/transparent"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints="Password"
-        android:hint="@string/hint_password"
-        android:textColorHint="@color/text_secondary"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@color/primary"
-        android:inputType="textPassword"
-        android:textColor="@color/text_primary"
-        android:minHeight="48dp" />
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/primary"
+        app:startIconDrawable="@android:drawable/ic_lock_lock"
+        app:startIconTint="@color/primary"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_password"
+            android:inputType="textPassword"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:background="@android:color/transparent"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnLogin"
