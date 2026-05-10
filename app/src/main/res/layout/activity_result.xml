@@ -18,28 +18,55 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_result"
-            android:textSize="22sp"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginBottom="24dp"
             android:textColor="@color/primary"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardVerdict"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/primary"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/tvVerdictText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="8dp"
+                android:text="ANALISI IN CORSO..."
+                android:textStyle="bold"
+                android:textSize="14sp" />
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/loadingProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
             android:indeterminate="true"
-            app:indicatorColor="@color/secondary"
-            app:trackCornerRadius="4dp" />
+            app:indicatorColor="@color/secondary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mappa delle frequenze (Impronta digitale dei pixel)"
+            android:textSize="12sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:alpha="0.7"
+            android:gravity="start" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="8dp"
-            app:strokeWidth="2dp"
-            app:strokeColor="@color/primary">
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp">
 
             <ImageView
                 android:id="@+id/ivFftResult"
@@ -47,20 +74,100 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:background="#000"
-                android:transitionName="shared_image_container"
-                android:contentDescription="@string/content_desc_fft" />
+                android:transitionName="shared_image_container" />
         </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:id="@+id/tvClassification"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/resultsContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/status_calculating"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
             android:layout_marginTop="32dp"
-            android:textColor="@color/text_primary"
-            android:textAlignment="center"/>
+            android:baselineAligned="false"
+            android:visibility="invisible">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Analisi Struttura"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvResultFFT"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(Algoritmo FFT)"
+                    android:textSize="10sp"
+                    android:alpha="0.6" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/text_secondary"
+                android:alpha="0.2" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Analisi Visiva"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvResultAI"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(Reti Neurali)"
+                    android:textSize="10sp"
+                    android:alpha="0.6" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvHelpHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="L'analisi FFT rileva anomalie matematiche nei pixel, l'IA cerca pattern tipici dei generatori di immagini."
+            android:textSize="11sp"
+            android:textAlignment="center"
+            android:alpha="0.5"
+            android:fontStyle="italic"
+            android:visibility="invisible"/>
 
         <View
             android:layout_width="match_parent"
@@ -70,12 +177,11 @@
         <Button
             android:id="@+id/btnClose"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_close"
-            android:layout_marginTop="24dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            app:strokeColor="@color/primary"
-            android:textColor="@color/primary"/>
+            android:layout_height="56dp"
+            android:text="TORNA ALLA HOME"
+            android:layout_marginTop="16dp"
+            app:cornerRadius="12dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
     </LinearLayout>
 </ScrollView>

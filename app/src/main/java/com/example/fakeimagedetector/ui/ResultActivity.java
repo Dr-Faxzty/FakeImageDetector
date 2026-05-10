@@ -5,20 +5,21 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.logic.FFTAnalyzer;
 import com.example.fakeimagedetector.logic.ONNXAnalyzer;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,6 +27,9 @@ import java.util.concurrent.Executors;
 public class ResultActivity extends AppCompatActivity {
     private ONNXAnalyzer onnxAnalyzer;
     private CircularProgressIndicator loadingProgress;
+    private View resultsContainer;
+    private TextView tvResultFFT, tvResultAI, tvVerdictText, tvHelpHint;
+    private MaterialCardView cardVerdict;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +38,21 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         ImageView ivFftResult = findViewById(R.id.ivFftResult);
-        TextView tvClassification = findViewById(R.id.tvClassification);
+        resultsContainer = findViewById(R.id.resultsContainer);
+        tvResultFFT = findViewById(R.id.tvResultFFT);
+        tvResultAI = findViewById(R.id.tvResultAI);
+        tvVerdictText = findViewById(R.id.tvVerdictText);
+        tvHelpHint = findViewById(R.id.tvHelpHint);
+        cardVerdict = findViewById(R.id.cardVerdict);
         Button btnClose = findViewById(R.id.btnClose);
         loadingProgress = findViewById(R.id.loadingProgress);
 
         loadingProgress.setVisibility(View.VISIBLE);
-        tvClassification.setVisibility(View.INVISIBLE);
+        resultsContainer.setVisibility(View.INVISIBLE);
+        cardVerdict.setVisibility(View.INVISIBLE);
+        tvHelpHint.setVisibility(View.INVISIBLE);
 
         String uriString = getIntent().getStringExtra("IMAGE_URI");
-        boolean useAI = getIntent().getBooleanExtra("USE_AI", false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
@@ -51,31 +61,26 @@ public class ResultActivity extends AppCompatActivity {
 
         if (uriString != null) {
             Uri imageUri = Uri.parse(uriString);
-
             ExecutorService executor = Executors.newSingleThreadExecutor();
+
             executor.execute(() -> {
                 try {
                     Bitmap original = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
 
-                    final double probability;
-                    final Bitmap displayBitmap;
+                    FFTAnalyzer.AnalysisResult fftResult = FFTAnalyzer.analyze(original);
 
-                    if (useAI) {
-                        if (onnxAnalyzer == null) {
-                            onnxAnalyzer = new ONNXAnalyzer(this);
-                        }
-                        probability = onnxAnalyzer.predict(original);
-                        displayBitmap = original;
-                    } else {
-                        FFTAnalyzer.AnalysisResult result = FFTAnalyzer.analyze(original);
-                        probability = result.fakeProbability;
-                        displayBitmap = result.fftBitmap;
+                    if (onnxAnalyzer == null) {
+                        onnxAnalyzer = new ONNXAnalyzer(this);
                     }
+                    double aiProbability = onnxAnalyzer.predict(original);
 
                     runOnUiThread(() -> {
                         loadingProgress.setVisibility(View.GONE);
-                        tvClassification.setVisibility(View.VISIBLE);
-                        ivFftResult.setImageBitmap(displayBitmap);
+                        resultsContainer.setVisibility(View.VISIBLE);
+                        cardVerdict.setVisibility(View.VISIBLE);
+                        tvHelpHint.setVisibility(View.VISIBLE);
+
+                        ivFftResult.setImageBitmap(fftResult.fftBitmap);
 
                         ivFftResult.getViewTreeObserver().addOnPreDrawListener(
                                 new ViewTreeObserver.OnPreDrawListener() {
@@ -87,17 +92,10 @@ public class ResultActivity extends AppCompatActivity {
                                     }
                                 });
 
-                        String method = useAI ? "IA (ONNX)" : "FFT";
-                        String methodLabel = getString(R.string.method_label, method);
-                        String probLabel = getString(R.string.probability_label, probability);
+                        updateVerdictUI(fftResult.fakeProbability, aiProbability);
 
-                        tvClassification.setText(methodLabel + "\n" + probLabel + "%");
-
-                        if (probability > 50) {
-                            tvClassification.setTextColor(getColor(R.color.fake_red));
-                        } else {
-                            tvClassification.setTextColor(getColor(R.color.real_green));
-                        }
+                        tvResultFFT.setText(String.format("%.1f%%", fftResult.fakeProbability));
+                        tvResultAI.setText(String.format("%.1f%%", aiProbability));
                     });
 
                 } catch (Exception e) {
@@ -105,12 +103,33 @@ public class ResultActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         loadingProgress.setVisibility(View.GONE);
                         supportStartPostponedEnterTransition();
-                        Toast.makeText(this, "Errore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Errore analisi: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
                 }
             });
         }
 
-       btnClose.setOnClickListener(v -> finishAfterTransition());
+        btnClose.setOnClickListener(v -> finishAfterTransition());
+    }
+
+    private void updateVerdictUI(double fftProb, double aiProb) {
+        double average = (fftProb + aiProb) / 2;
+
+        if (average > 70) {
+            tvVerdictText.setText("SOSPETTO FAKE");
+            int color = getColor(R.color.fake_red);
+            cardVerdict.setStrokeColor(color);
+            tvVerdictText.setTextColor(color);
+        } else if (average < 30) {
+            tvVerdictText.setText("PROBABILMENTE REALE");
+            int color = getColor(R.color.real_green);
+            cardVerdict.setStrokeColor(color);
+            tvVerdictText.setTextColor(color);
+        } else {
+            tvVerdictText.setText("ANALISI INCERTA");
+            int color = getColor(R.color.primary);
+            cardVerdict.setStrokeColor(color);
+            tvVerdictText.setTextColor(color);
+        }
     }
 }

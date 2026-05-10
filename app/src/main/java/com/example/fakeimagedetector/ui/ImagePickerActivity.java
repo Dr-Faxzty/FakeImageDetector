@@ -34,7 +34,6 @@ public class ImagePickerActivity extends AppCompatActivity {
     private ImageView ivPreview;
     private Button btnCheck;
     private Uri selectedImageUri;
-    private SwitchCompat swAnalysisMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +53,9 @@ public class ImagePickerActivity extends AppCompatActivity {
         ivPreview = findViewById(R.id.ivPreview);
         Button btnLoad = findViewById(R.id.btnLoad);
         btnCheck = findViewById(R.id.btnCheck);
-        swAnalysisMode = findViewById(R.id.swAnalysisMode);
 
         btnLoad.setText(R.string.btn_load);
         btnCheck.setText(R.string.btn_check);
-        swAnalysisMode.setText(R.string.switch_ai_mode);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
@@ -71,7 +68,6 @@ public class ImagePickerActivity extends AppCompatActivity {
             if (selectedImageUri != null) {
                 Intent intent = new Intent(this, ResultActivity.class);
                 intent.putExtra("IMAGE_URI", selectedImageUri.toString());
-                intent.putExtra("USE_AI", swAnalysisMode.isChecked());
 
                 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
                         this,
