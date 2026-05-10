@@ -16,6 +16,9 @@ public class FFTAnalyzer {
     }
 
     public static AnalysisResult analyze(Bitmap src) {
+        if (src == null) {
+            return null;
+        }
         Bitmap bitmap = Bitmap.createScaledBitmap(src, 256, 256, true);
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();

@@ -1,4 +1,4 @@
-package com.example.fakeimagedetector;
+package com.example.fakeimagedetector.security;
 
 import static org.junit.Assert.*;
 
@@ -6,9 +6,6 @@ import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-
-import com.example.fakeimagedetector.security.AuthManager;
-import com.example.fakeimagedetector.security.DatabaseHelper;
 
 import org.junit.After;
 import org.junit.Before;

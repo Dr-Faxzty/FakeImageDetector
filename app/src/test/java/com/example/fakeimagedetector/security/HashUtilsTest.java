@@ -1,9 +1,7 @@
-package com.example.fakeimagedetector;
+package com.example.fakeimagedetector.security;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-
-import com.example.fakeimagedetector.security.HashUtils;
 
 public class HashUtilsTest {
 

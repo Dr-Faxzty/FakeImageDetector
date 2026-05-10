@@ -34,6 +34,9 @@ public class ONNXAnalyzer {
     }
 
     public double predict(Bitmap bitmap) throws Exception {
+        if (bitmap == null) {
+            throw new IllegalArgumentException("Bitmap cannot be null");
+        }
         Bitmap resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true);
         float[] inputData = bitmapToFloatArray(resized);
 
