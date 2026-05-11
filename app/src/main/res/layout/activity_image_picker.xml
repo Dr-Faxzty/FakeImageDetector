@@ -51,6 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="@string/btn_load"
+        android:textColor="@android:color/white"
         android:layout_marginTop="16dp"
         app:cornerRadius="12dp"
         android:backgroundTint="@color/primary_variant" />
