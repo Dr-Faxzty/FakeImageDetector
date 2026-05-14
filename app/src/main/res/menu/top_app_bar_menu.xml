@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_history"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="Cronologia"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:fitsSystemWindows="true"

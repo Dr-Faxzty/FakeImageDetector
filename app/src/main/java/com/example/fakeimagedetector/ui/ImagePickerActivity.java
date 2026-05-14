@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,6 +24,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.fakeimagedetector.R;
+import com.example.fakeimagedetector.security.AnalysisManager;
+import com.example.fakeimagedetector.security.AuthManager;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.IOException;
@@ -45,6 +48,9 @@ public class ImagePickerActivity extends AppCompatActivity {
         topAppBar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
                 handleLogout();
+                return true;
+            } else if (item.getItemId() == R.id.action_history) {
+                showHistoryDialog();
                 return true;
             }
             return false;
@@ -108,6 +114,33 @@ public class ImagePickerActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/jpeg");
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    private void showHistoryDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_history, null);
+        androidx.recyclerview.widget.RecyclerView rvHistory = dialogView.findViewById(R.id.rvHistory);
+
+        AnalysisManager analysisManager = new AnalysisManager(this);
+        AuthManager authManager = new AuthManager(this);
+        int userId = authManager.getLoggedInUserId();
+
+        android.database.Cursor cursor = analysisManager.getHistoryCursor(userId);
+
+        if (cursor == null || cursor.getCount() == 0) {
+            Toast.makeText(this, "Nessuna analisi salvata", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AnalysisAdapter adapter = new AnalysisAdapter(cursor);
+        rvHistory.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        rvHistory.setAdapter(adapter);
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Ultime 5 Analisi")
+                .setView(dialogView)
+                .setPositiveButton("Chiudi", (dialog, which) -> cursor.close()) // Ricorda di chiudere il cursor
+                .setOnDismissListener(dialog -> cursor.close())
+                .show();
     }
 
     @Override

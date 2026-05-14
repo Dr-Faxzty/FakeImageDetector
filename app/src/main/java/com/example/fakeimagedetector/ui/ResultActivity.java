@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.logic.FFTAnalyzer;
 import com.example.fakeimagedetector.logic.ONNXAnalyzer;
+import com.example.fakeimagedetector.security.AnalysisManager;
+import com.example.fakeimagedetector.security.AuthManager;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
@@ -30,6 +32,9 @@ public class ResultActivity extends AppCompatActivity {
     private View resultsContainer;
     private TextView tvResultFFT, tvResultAI, tvVerdictText, tvHelpHint;
     private MaterialCardView cardVerdict;
+
+    private AnalysisManager analysisManager;
+    private AuthManager authManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,9 @@ public class ResultActivity extends AppCompatActivity {
         resultsContainer.setVisibility(View.INVISIBLE);
         cardVerdict.setVisibility(View.INVISIBLE);
         tvHelpHint.setVisibility(View.INVISIBLE);
+
+        analysisManager = new AnalysisManager(this);
+        authManager = new AuthManager(this);
 
         String uriString = getIntent().getStringExtra("IMAGE_URI");
 
@@ -74,6 +82,12 @@ public class ResultActivity extends AppCompatActivity {
                     }
                     double aiProbability = onnxAnalyzer.predict(original);
 
+                    double average = (fftResult.fakeProbability + aiProbability) / 2;
+                    String verdictLabel = getVerdictLabel(average);
+                    int currentUserId = authManager.getLoggedInUserId();
+
+                    analysisManager.addAnalysis(currentUserId, average, verdictLabel);
+
                     runOnUiThread(() -> {
                         loadingProgress.setVisibility(View.GONE);
                         resultsContainer.setVisibility(View.VISIBLE);
@@ -92,10 +106,10 @@ public class ResultActivity extends AppCompatActivity {
                                     }
                                 });
 
-                        updateVerdictUI(fftResult.fakeProbability, aiProbability);
-
-                        tvResultFFT.setText(String.format("%.1f%%", fftResult.fakeProbability));
-                        tvResultAI.setText(String.format("%.1f%%", aiProbability));
+                        updateVerdictUI(average, label -> {
+                            tvResultFFT.setText(String.format("%.1f%%", fftResult.fakeProbability));
+                            tvResultAI.setText(String.format("%.1f%%", aiProbability));
+                        });
                     });
 
                 } catch (Exception e) {
@@ -112,24 +126,33 @@ public class ResultActivity extends AppCompatActivity {
         btnClose.setOnClickListener(v -> finishAfterTransition());
     }
 
-    private void updateVerdictUI(double fftProb, double aiProb) {
-        double average = (fftProb + aiProb) / 2;
+    private String getVerdictLabel(double average) {
+        if (average > 70) return "SOSPETTO FAKE";
+        if (average < 30) return "PROBABILMENTE REALE";
+        return "ANALISI INCERTA";
+    }
 
+    private void updateVerdictUI(double average, UIUpdateCallback callback) {
+        String label = getVerdictLabel(average);
+        tvVerdictText.setText(label);
+
+        int color;
         if (average > 70) {
-            tvVerdictText.setText("SOSPETTO FAKE");
-            int color = getColor(R.color.fake_red);
-            cardVerdict.setStrokeColor(color);
-            tvVerdictText.setTextColor(color);
+            color = getColor(R.color.fake_red);
         } else if (average < 30) {
-            tvVerdictText.setText("PROBABILMENTE REALE");
-            int color = getColor(R.color.real_green);
-            cardVerdict.setStrokeColor(color);
-            tvVerdictText.setTextColor(color);
+            color = getColor(R.color.real_green);
         } else {
-            tvVerdictText.setText("ANALISI INCERTA");
-            int color = getColor(R.color.primary);
-            cardVerdict.setStrokeColor(color);
-            tvVerdictText.setTextColor(color);
+            color = getColor(R.color.primary);
         }
+
+        cardVerdict.setStrokeColor(color);
+        tvVerdictText.setTextColor(color);
+
+        if (callback != null) callback.onUpdate(label);
+    }
+
+    // Interfaccia funzionale per pulizia del codice UI
+    private interface UIUpdateCallback {
+        void onUpdate(String label);
     }
 }
