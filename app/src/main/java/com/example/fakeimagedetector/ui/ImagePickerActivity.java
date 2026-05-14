@@ -89,6 +89,9 @@ public class ImagePickerActivity extends AppCompatActivity {
     }
 
     private void handleLogout() {
+        android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+        prefs.edit().clear().apply();
+
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

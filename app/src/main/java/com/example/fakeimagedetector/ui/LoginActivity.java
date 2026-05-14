@@ -1,6 +1,7 @@
 package com.example.fakeimagedetector.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -14,10 +15,12 @@ import androidx.core.content.ContextCompat;
 
 import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.security.AuthManager;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText etUsername, etPassword;
     private Button btnAction;
+    private MaterialCheckBox cbRememberMe;
     private TextView tvSwitchAuth;
     private AuthManager authManager;
     private boolean isRegistrationMode = false;
@@ -25,6 +28,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+        if (prefs.getBoolean("isLoggedIn", false)) {
+            startActivity(new Intent(this, ImagePickerActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
         authManager = new AuthManager(this);
@@ -33,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnAction = findViewById(R.id.btnLogin);
         tvSwitchAuth = findViewById(R.id.tvSwitchAuth);
+        cbRememberMe = findViewById(R.id.cbRememberMe);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
@@ -62,11 +74,19 @@ public class LoginActivity extends AppCompatActivity {
 
         if (isRegistrationMode) {
             authManager.register(user, pass);
-            Toast.makeText(this, "Registrazione completata! Accedi ora.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registrazione completata!", Toast.LENGTH_SHORT).show();
             isRegistrationMode = false;
             updateUI();
         } else {
             if (authManager.login(user, pass)) {
+                if (cbRememberMe.isChecked()) {
+                    SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("isLoggedIn", true);
+                    editor.putInt("userId", authManager.getLoggedInUserId());
+                    editor.apply();
+                }
+
                 Intent intent = new Intent(LoginActivity.this, ImagePickerActivity.class);
                 startActivity(intent);
                 finish();
