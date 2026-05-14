@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_history"
-        android:icon="@android:drawable/ic_menu_recent_history"
+        android:icon="@drawable/ic_history"
         android:title="Cronologia"
         app:showAsAction="ifRoom" />
 
@@ -12,7 +12,7 @@
         android:id="@+id/action_logout"
         android:title="Logout"
         android:fitsSystemWindows="true"
-        android:icon="@android:drawable/ic_lock_power_off"
+        android:icon="@drawable/ic_logout"
         android:iconTint="@color/primary"
         app:showAsAction="ifRoom" />
 </menu>
