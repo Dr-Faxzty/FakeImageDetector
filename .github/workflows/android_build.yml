@@ -35,7 +35,26 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ./gradlew connectedDebugAndroidTest
+          target: default
+          arch: x86
+          profile: Nexus 6
+          force-avd-creation: false
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            local boot_completed=false
+            while [ "$boot_completed" == false ]; do
+              status=$(adb shell getprop sys.boot_completed | tr -d '\r')
+              if [ "$status" == "1" ]; then
+                # Controllo extra: il servizio 'package' è attivo?
+                service_check=$(adb shell service check package | grep "Service package: found")
+                if [ ! -z "$service_check" ]; then
+                  boot_completed=true
+                fi
+              fi
+              sleep 5
+            done
+            ./gradlew connectedDebugAndroidTest
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug
