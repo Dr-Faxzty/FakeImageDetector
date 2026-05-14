@@ -2,7 +2,10 @@ package com.example.fakeimagedetector.logic;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import org.jtransforms.fft.DoubleFFT_2D;
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
 
 public class FFTAnalyzer {
     public static class AnalysisResult {
@@ -15,56 +18,58 @@ public class FFTAnalyzer {
         }
     }
 
-    public static AnalysisResult analyze(Bitmap src) {
-        if (src == null) {
-            return null;
-        }
-        Bitmap bitmap = Bitmap.createScaledBitmap(src, 256, 256, true);
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
+    public static AnalysisResult analyze(Bitmap bitmap) {
+        int size = 256;
+        Bitmap scaled = Bitmap.createScaledBitmap(bitmap, size, size, true);
 
-        double[] data = new double[width * height * 2];
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int pixel = bitmap.getPixel(x, y);
-                double gray = (Color.red(pixel) * 0.299 + Color.green(pixel) * 0.587 + Color.blue(pixel) * 0.114);
-                data[2 * (y * width + x)] = gray;
-                data[2 * (y * width + x) + 1] = 0;
+        Complex[][] matrix = new Complex[size][size];
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int p = scaled.getPixel(x, y);
+                double gray = (Color.red(p) * 0.299 + Color.green(p) * 0.587 + Color.blue(p) * 0.114);
+                matrix[y][x] = new Complex(gray, 0);
             }
         }
 
-        DoubleFFT_2D fft2D = new DoubleFFT_2D(height, width);
-        fft2D.complexForward(data);
+        FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
 
-       return processFFTData(data, width, height);
+        for (int i = 0; i < size; i++) {
+            matrix[i] = transformer.transform(matrix[i], TransformType.FORWARD);
+        }
+
+        for (int j = 0; j < size; j++) {
+            Complex[] column = new Complex[size];
+            for (int i = 0; i < size; i++) column[i] = matrix[i][j];
+            column = transformer.transform(column, TransformType.FORWARD);
+            for (int i = 0; i < size; i++) matrix[i][j] = column[i];
+        }
+
+        return processResults(matrix, size);
     }
 
-    private static AnalysisResult processFFTData(double[] data, int w, int h) {
-        Bitmap output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    private static AnalysisResult processResults(Complex[][] matrix, int size) {
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         double highFreqEnergy = 0;
         double totalEnergy = 0;
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                double re = data[2 * (y * w + x)];
-                double im = data[2 * (y * w + x) + 1];
-                double magnitude = Math.log(1 + Math.sqrt(re * re + im * im));
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                double mag = Math.log(1 + matrix[y][x].abs());
 
-               int val = (int) Math.min(255, magnitude * 20);
-                output.setPixel(x, y, Color.rgb(val, val, val));
+                int displayX = (x + size / 2) % size;
+                int displayY = (y + size / 2) % size;
+                int colorVal = (int) Math.min(255, mag * 20);
+                output.setPixel(displayX, displayY, Color.rgb(colorVal, colorVal, colorVal));
 
-                double distance = Math.sqrt(Math.pow(x - w/2.0, 2) + Math.pow(y - h/2.0, 2));
-                if (distance > (w / 4.0)) {
-                    highFreqEnergy += magnitude;
+                double dist = Math.sqrt(Math.pow(x - size/2.0, 2) + Math.pow(y - size/2.0, 2));
+                if (dist > (size / 4.0)) {
+                    highFreqEnergy += mag;
                 }
-                totalEnergy += magnitude;
+                totalEnergy += mag;
             }
         }
 
-        double score = (highFreqEnergy / totalEnergy) * 100;
-        double probability = Math.min(100, score);
-
-        return new AnalysisResult(output, probability);
+        double probability = (highFreqEnergy / totalEnergy) * 100;
+        return new AnalysisResult(output, Math.min(100, probability));
     }
 }
