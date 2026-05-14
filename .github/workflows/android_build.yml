@@ -37,23 +37,26 @@ jobs:
           api-level: 29
           target: default
           arch: x86
-          profile: Nexus 6
+          profile: Nexus 4
           force-avd-creation: false
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
-            local boot_completed=false
-            while [ "$boot_completed" == false ]; do
+            boot_completed=false
+            while [ "$boot_completed" = false ]; do
               status=$(adb shell getprop sys.boot_completed | tr -d '\r')
-              if [ "$status" == "1" ]; then
-                # Controllo extra: il servizio 'package' è attivo?
-                service_check=$(adb shell service check package | grep "Service package: found")
-                if [ ! -z "$service_check" ]; then
+              if [ "$status" = "1" ]; then
+                service_check=$(adb shell service check package)
+                if echo "$service_check" | grep -q "found"; then
                   boot_completed=true
                 fi
               fi
-              sleep 5
+              if [ "$boot_completed" = false ]; then
+                echo "Waiting for Android Service Manager..."
+                sleep 10
+              fi
             done
+            echo "Android is fully ready! Starting tests..."
             ./gradlew connectedDebugAndroidTest
 
       - name: Build Debug APK
