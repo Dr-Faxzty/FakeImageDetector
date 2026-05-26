@@ -31,7 +31,8 @@ public class ONNXAnalyzerTest {
     }
 
     private String getString(int onnxModelName) {
-        return "deepfake_model_quant.onnx";
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        return context.getString(onnxModelName);
     }
 
     @Test
