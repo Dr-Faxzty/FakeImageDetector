@@ -1,5 +1,6 @@
 package com.example.fakeimagedetector.logic;
 
+import static android.provider.Settings.System.getString;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -10,6 +11,8 @@ import android.graphics.Color;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.example.fakeimagedetector.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +26,12 @@ public class ONNXAnalyzerTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        onnxAnalyzer = new ONNXAnalyzer(context);
+        String modelName = getString(R.string.onnx_model_name);
+        onnxAnalyzer = new ONNXAnalyzer(context, modelName);
+    }
+
+    private String getString(int onnxModelName) {
+        return "deepfake_model_quant.onnx";
     }
 
     @Test

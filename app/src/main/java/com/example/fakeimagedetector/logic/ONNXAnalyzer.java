@@ -2,25 +2,25 @@ package com.example.fakeimagedetector.logic;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-
 import ai.onnxruntime.*;
 import java.util.Collections;
 
 public class ONNXAnalyzer {
     private final OrtEnvironment env;
     private final OrtSession session;
+    private final String modelName;
 
-    public ONNXAnalyzer(Context context) throws Exception {
-        env = OrtEnvironment.getEnvironment();
-
+    public ONNXAnalyzer(Context context, String modelName) throws Exception {
+        this.env = OrtEnvironment.getEnvironment();
+        this.modelName = modelName;
         String modelPath = copyAssetToFile(context);
-        session = env.createSession(modelPath);
+        this.session = env.createSession(modelPath);
     }
 
     private String copyAssetToFile(Context context) throws Exception {
-        java.io.File file = new java.io.File(context.getFilesDir(), "deepfake_model_quant.onnx");
+        java.io.File file = new java.io.File(context.getFilesDir(), modelName);
         if (!file.exists()) {
-            try (java.io.InputStream is = context.getAssets().open("deepfake_model_quant.onnx");
+            try (java.io.InputStream is = context.getAssets().open(modelName);
                  java.io.OutputStream os = new java.io.FileOutputStream(file)) {
                 byte[] buffer = new byte[4 * 1024];
                 int read;
@@ -37,6 +37,7 @@ public class ONNXAnalyzer {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap cannot be null");
         }
+
         Bitmap resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true);
         float[] inputData = bitmapToFloatArray(resized);
 
@@ -46,12 +47,20 @@ public class ONNXAnalyzer {
         OrtSession.Result result = session.run(Collections.singletonMap("input", tensor));
         float[][] output = (float[][]) result.get(0).getValue();
 
-       float realLogit = output[0][0]; // Classe 0: Real
-        float fakeLogit = output[0][1]; // Classe 1: Fake
+        double probabilityFake = 0.0;
+        int outputClasses = output[0].length;
 
-        double expReal = Math.exp(realLogit);
-        double expFake = Math.exp(fakeLogit);
-        double probabilityFake = expFake / (expReal + expFake);
+        if (outputClasses == 1) {
+            float logit = output[0][0];
+            probabilityFake = 1.0 / (1.0 + Math.exp(-logit));
+        } else if (outputClasses >= 2) {
+            float realLogit = output[0][0];
+            float fakeLogit = output[0][1];
+
+            double expReal = Math.exp(realLogit);
+            double expFake = Math.exp(fakeLogit);
+            probabilityFake = expFake / (expReal + expFake);
+        }
 
         return probabilityFake * 100;
     }

@@ -78,7 +78,8 @@ public class ResultActivity extends AppCompatActivity {
                     FFTAnalyzer.AnalysisResult fftResult = FFTAnalyzer.analyze(original);
 
                     if (onnxAnalyzer == null) {
-                        onnxAnalyzer = new ONNXAnalyzer(this);
+                        String modelName = getString(R.string.onnx_model_name);
+                        onnxAnalyzer = new ONNXAnalyzer(this, modelName);
                     }
                     double aiProbability = onnxAnalyzer.predict(original);
 
