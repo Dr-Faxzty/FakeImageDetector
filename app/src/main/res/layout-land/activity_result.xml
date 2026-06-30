@@ -68,8 +68,9 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Mappa delle frequenze"
+                    android:text="Mappa delle frequenze (Impronta digitale dei pixel)"
                     android:textSize="11sp"
+                    android:textColor="@color/secondary"
                     android:layout_marginBottom="8dp"
                     android:alpha="0.7" />
 
@@ -115,6 +116,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="Analisi Struttura (FFT):"
+                            android:textColor="@color/primary"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -125,7 +127,7 @@
                             android:text="--"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary" />
+                            android:textColor="@color/secondary" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -140,6 +142,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="Analisi Visiva (IA):"
+                            android:textColor="@color/primary"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -150,29 +153,27 @@
                             android:text="--"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary" />
+                            android:textColor="@color/secondary" />
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvHelpHint"
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="L'analisi combina modelli matematici e neurali."
-                    android:textSize="10sp"
-                    android:alpha="0.5"
-                    android:fontStyle="italic"
-                    android:visibility="invisible"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
                 <Button
                     android:id="@+id/btnClose"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="56dp"
                     android:text="TORNA ALLA HOME"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
                     app:cornerRadius="12dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                    app:backgroundTint="@color/secondary"
+                    android:textColor="@color/primary"
+                    style="@style/Widget.MaterialComponents.Button" />
             </LinearLayout>
         </LinearLayout>
 

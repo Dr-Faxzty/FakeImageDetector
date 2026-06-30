@@ -17,7 +17,7 @@ import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.security.AuthManager;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
-public class LoginActivity extends AppCompatActivity {
+public class AuthActivity extends AppCompatActivity {
     private EditText etUsername, etPassword;
     private Button btnAction;
     private MaterialCheckBox cbRememberMe;
@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                     editor.apply();
                 }
 
-                Intent intent = new Intent(LoginActivity.this, ImagePickerActivity.class);
+                Intent intent = new Intent(AuthActivity.this, ImagePickerActivity.class);
                 startActivity(intent);
                 finish();
             } else {

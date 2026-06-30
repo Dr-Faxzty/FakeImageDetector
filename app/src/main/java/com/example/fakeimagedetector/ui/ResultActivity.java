@@ -30,7 +30,7 @@ public class ResultActivity extends AppCompatActivity {
     private ONNXAnalyzer onnxAnalyzer;
     private CircularProgressIndicator loadingProgress;
     private View resultsContainer;
-    private TextView tvResultFFT, tvResultAI, tvVerdictText, tvHelpHint;
+    private TextView tvResultFFT, tvResultAI, tvVerdictText; // Rimosso tvHelpHint
     private MaterialCardView cardVerdict;
 
     private AnalysisManager analysisManager;
@@ -47,7 +47,6 @@ public class ResultActivity extends AppCompatActivity {
         tvResultFFT = findViewById(R.id.tvResultFFT);
         tvResultAI = findViewById(R.id.tvResultAI);
         tvVerdictText = findViewById(R.id.tvVerdictText);
-        tvHelpHint = findViewById(R.id.tvHelpHint);
         cardVerdict = findViewById(R.id.cardVerdict);
         Button btnClose = findViewById(R.id.btnClose);
         loadingProgress = findViewById(R.id.loadingProgress);
@@ -55,7 +54,6 @@ public class ResultActivity extends AppCompatActivity {
         loadingProgress.setVisibility(View.VISIBLE);
         resultsContainer.setVisibility(View.INVISIBLE);
         cardVerdict.setVisibility(View.INVISIBLE);
-        tvHelpHint.setVisibility(View.INVISIBLE);
 
         analysisManager = new AnalysisManager(this);
         authManager = new AuthManager(this);
@@ -93,7 +91,6 @@ public class ResultActivity extends AppCompatActivity {
                         loadingProgress.setVisibility(View.GONE);
                         resultsContainer.setVisibility(View.VISIBLE);
                         cardVerdict.setVisibility(View.VISIBLE);
-                        tvHelpHint.setVisibility(View.VISIBLE);
 
                         ivFftResult.setImageBitmap(fftResult.fftBitmap);
 
@@ -137,22 +134,27 @@ public class ResultActivity extends AppCompatActivity {
         String label = getVerdictLabel(average);
         tvVerdictText.setText(label);
 
-        int color;
+        int textColor;
+        int backgroundColor;
+
         if (average > 70) {
-            color = getColor(R.color.fake_red);
+            textColor = getColor(R.color.fake_red);
+            backgroundColor = getColor(android.R.color.transparent);
         } else if (average < 30) {
-            color = getColor(R.color.real_green);
+            textColor = getColor(R.color.real_green);
+            backgroundColor = getColor(android.R.color.transparent);
         } else {
-            color = getColor(R.color.primary);
+            textColor = getColor(R.color.secondary);
+            backgroundColor = getColor(android.R.color.transparent);
         }
 
-        cardVerdict.setStrokeColor(color);
-        tvVerdictText.setTextColor(color);
+        cardVerdict.setStrokeColor(textColor);
+        cardVerdict.setCardBackgroundColor(backgroundColor);
+        tvVerdictText.setTextColor(textColor);
 
         if (callback != null) callback.onUpdate(label);
     }
 
-    // Interfaccia funzionale per pulizia del codice UI
     private interface UIUpdateCallback {
         void onUpdate(String label);
     }

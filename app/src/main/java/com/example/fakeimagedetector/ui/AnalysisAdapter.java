@@ -34,13 +34,19 @@ public class AnalysisAdapter extends RecyclerView.Adapter<AnalysisAdapter.ViewHo
             holder.tvProb.setText(String.format("%.1f%%", prob));
             holder.tvDate.setText(date);
 
-            int color = holder.itemView.getContext().getColor(R.color.primary);
+            int color = holder.itemView.getContext().getColor(R.color.secondary);
+
             if (verdict.contains("FAKE")) {
                 color = holder.itemView.getContext().getColor(R.color.fake_red);
             } else if (verdict.contains("REALE")) {
                 color = holder.itemView.getContext().getColor(R.color.real_green);
             }
+
             holder.tvVerdict.setTextColor(color);
+            holder.tvProb.setTextColor(color);
+
+            holder.tvDate.setTextColor(holder.itemView.getContext().getColor(android.R.color.white));
+            holder.tvDate.setAlpha(0.6f);
         }
     }
 

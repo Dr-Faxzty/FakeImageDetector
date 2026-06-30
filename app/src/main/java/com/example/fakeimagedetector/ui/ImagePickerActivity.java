@@ -14,12 +14,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.app.ActivityOptions;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -27,6 +26,7 @@ import com.example.fakeimagedetector.R;
 import com.example.fakeimagedetector.security.AnalysisManager;
 import com.example.fakeimagedetector.security.AuthManager;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
 
@@ -92,7 +92,7 @@ public class ImagePickerActivity extends AppCompatActivity {
         android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
         prefs.edit().clear().apply();
 
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, AuthActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -138,12 +138,17 @@ public class ImagePickerActivity extends AppCompatActivity {
         rvHistory.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
         rvHistory.setAdapter(adapter);
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle("Ultime 5 Analisi")
                 .setView(dialogView)
-                .setPositiveButton("Chiudi", (dialog, which) -> cursor.close()) // Ricorda di chiudere il cursor
-                .setOnDismissListener(dialog -> cursor.close())
+                .setPositiveButton("Chiudi", (d, which) -> cursor.close())
+                .setOnDismissListener(d -> cursor.close())
                 .show();
+
+        Button closeButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (closeButton != null) {
+            closeButton.setTextColor(ContextCompat.getColor(this, R.color.secondary));
+        }
     }
 
     @Override

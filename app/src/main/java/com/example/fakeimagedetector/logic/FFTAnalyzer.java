@@ -19,6 +19,10 @@ public class FFTAnalyzer {
     }
 
     public static AnalysisResult analyze(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
+
         int size = 256;
         Bitmap scaled = Bitmap.createScaledBitmap(bitmap, size, size, true);
 
